@@ -17,41 +17,56 @@ var yourRequest= inputArguments.slice(1);
 
 // logs input history
 writeRecord(command, yourRequest);
+// take in args for eval
+executeCommand(command, yourRequest);
 
-// depending on what the first arg is we will call the appropiate function
-// use index 0 to choose appropiate method
-switch(command) {
+// main function that calls on the right functions depending on command
+function executeCommand(command, yourRequest){
+	// depending on what the first arg is we will call the appropiate function
+	// use index 0 to choose appropiate method
+	switch(command) {
 
-// use index 1 to pass to the corresponding function
-    case "my-tweets":
-        getMyTweets();
-        break;
-    case "spotify-this-song":
-        getMySong(yourRequest);
-        break;
-    case "movie-this":
-        getMyMovie(yourRequest);
-        break;
-    case "do-what-it-says":
-    	getRandom();
-    	break;
-    default:
-        console.log("Ooops! Something went wrong!");
+	// use index 1 to pass to the corresponding function
+	    case "my-tweets":
+	        getMyTweets();
+	        break;
+	    case "spotify-this-song":
+	        getMySong(yourRequest);
+	        break;
+	    case "movie-this":
+	        getMyMovie(yourRequest);
+	        break;
+	    case "do-what-it-says":
+	    	getRandom();
+	    	break;
+	    	// if nothing matches
+	    default:
+	        console.log("Ooops! Something went wrong!");
+	        console.log("---AVAILABLE COMMANDS:------");
+	        console.log("my-tweets");
+	        console.log("spotify-this-song");
+	        console.log("movie-this");
+	        console.log("do-what-it-says");
+	};
+
 };
 
-
+// random will read a file and pick a random action
 function getRandom(){
 
 	// The code will store the contents of the reading inside the variable "data"
 	fs.readFile("random.txt", "utf8", function(error, data) {
 
-	  // Then split it by commas (to make it more readable)
+	  // Then split it into an array by commas (to make it more readable)
 	  var dataArr = data.split(",");
 
-	  // We will then re-display the content as an array for later use.
-	  console.log(dataArr);
-	   // We will then print the contents of data
-	  console.log("random data: "+dataArr);
+	  // pick a random index of array 
+	  var commandChosen = dataArr[Math.floor(Math.random() * dataArr.length)];
+
+	  commandChosen= String(commandChosen);
+	  console.log("Random Command Chosen: "+ commandChosen);
+
+	  executeCommand(commandChosen);
 
 	});
 
@@ -144,6 +159,10 @@ function getMySong(yourSong){
 
 // using request package we communicate with OMDB to get movie info
 function getMyMovie(yourMovie){
+
+	if(typeof yourMovie === "undefined" || null){
+		yourMovie= "Free Willy";
+	}
 
 	// encode arg ready to be used in URL
 	yourMovie= encodeURIComponent(yourMovie);
