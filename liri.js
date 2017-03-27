@@ -5,6 +5,7 @@ var twitter= require('twitter');
 var fs= require('fs');
 var twitterKeys = require('./keys.js');
 
+
 // store the input arguments
 var inputArguments= process.argv;
 // slice out the first and second args and keep the rest, start from index 2
@@ -14,13 +15,16 @@ inputArguments = inputArguments.slice(2);
 var command = inputArguments[0];
 var yourRequest= inputArguments.slice(1);
 
+// logs input history
+writeRecord(command, yourRequest);
+
 // depending on what the first arg is we will call the appropiate function
 // use index 0 to choose appropiate method
 switch(command) {
 
 // use index 1 to pass to the corresponding function
     case "my-tweets":
-        getMyTweets(yourRequest);
+        getMyTweets();
         break;
     case "spotify-this-song":
         getMySong(yourRequest);
@@ -28,27 +32,82 @@ switch(command) {
     case "movie-this":
         getMyMovie(yourRequest);
         break;
-        // should nothing match
+    case "do-what-it-says":
+    	getRandom();
+    	break;
     default:
         console.log("Ooops! Something went wrong!");
 };
 
 
+function getRandom(){
+
+	// The code will store the contents of the reading inside the variable "data"
+	fs.readFile("random.txt", "utf8", function(error, data) {
+
+	  // Then split it by commas (to make it more readable)
+	  var dataArr = data.split(",");
+
+	  // We will then re-display the content as an array for later use.
+	  console.log(dataArr);
+	   // We will then print the contents of data
+	  console.log("random data: "+dataArr);
+
+	});
+
+};
+
+
+// writes to a txt file the successful commands executed 
+function writeRecord(comm, req){
+
+	fs.appendFile("requestLog.txt", "INPUT-"+"C: "+comm+", R: "+req+".  ", function(err) {
+
+  // If the code experiences any errors it will log the error to the console.
+  if (err) {
+    return console.log(err);
+  }
+
+  // Otherwise, it will print: "movies.txt was updated!"
+  console.log("requestLog.txt was updated!");
+
+});
+}
+
+
 // gets latest tweets using index 1 as arg
-function getMyTweets(yourRequest){
+function getMyTweets(){
 
 	// gets keys from eported keys from keys.js
-	var client = twitterKeys;
+	// keys are in an object of the same name so use dot notation and name to access them from exports
+	var client = new twitter(twitterKeys.TKeys);
+
+	// console.log("client is: "+ JSON.stringify(client, null, 2));
 	 
-	var params = {screen_name: 'artofmarco'};
+	var params = {screen_name: 'artofmarco', count: '20'};
+
 
 	client.get('statuses/user_timeline', params, function(error, tweets, response) {
 
 	  if (!error) {
 	  	console.log("-----------MY TWEETS RESULTS--------------");
-	  	console.log(" ");
-	    console.log(tweets);
-	    console.log(" ");
+	  	//console.log(tweets[0]);
+	  	for(i=0; i< tweets.length; i++){
+	  		console.log(" ");
+		    console.log(tweets[i].user.name+ "- @"+ tweets[i].user.screen_name);
+		    
+		    // if regular tweet exists
+		    if(tweets[i].text){
+		    	console.log("Tweeted:");
+			    console.log(tweets[i].text);
+			    console.log(" * * * *");
+			}else{
+				// else look for retweet and look for text
+				console.log("Re-Tweeted:");
+				console.log(tweets[i].retweeted_status.text);
+				console.log(" * * * *");
+			}
+	    };
 	    
 	  }
 	});
@@ -60,13 +119,12 @@ function getMyTweets(yourRequest){
 // Passing index 1 as arg we search for a song
 function getMySong(yourSong){
 
-	spotify.search({ 
+	// if no song was provided
+	if(yourSong=== null){
+		yourSong= "The Sign";
+	}
 
-		type: 'track', 
-		query: yourSong, 
-		limit: "1", 
-
-	}, function(err, data) {
+	spotify.search({ type: 'track', query: yourSong, limit: "1"}, function(err, data) {
 
     if ( err ) {
         console.log('Error occurred: ' + err);
@@ -91,9 +149,7 @@ function getMyMovie(yourMovie){
 	yourMovie= encodeURIComponent(yourMovie);
 	console.log("encoded movie name: "+ yourMovie);
 
-	var queryUrl = "http://www.omdbapi.com/?t=" 
-	+ yourMovie 
-	+ "&y=&plot=short&r=json&tomatoes=true";
+	var queryUrl = "http://www.omdbapi.com/?t=" + yourMovie + "&y=&plot=short&r=json&tomatoes=true";
 
 	request(queryUrl, function(error, response, body) {
 
@@ -113,7 +169,6 @@ function getMyMovie(yourMovie){
     console.log("Actors: " + JSON.parse(body).Actors);
     console.log("Rotten Tomatoes Meter: " + JSON.parse(body).tomatoMeter);
     console.log("Rotten Tomatoes URL: " + JSON.parse(body).tomatoURL);
-
     console.log(" ");
     // response test
     //console.log("Title: " + JSON.stringify(body, null, 2));
