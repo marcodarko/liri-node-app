@@ -37,11 +37,13 @@ function executeCommand(command, yourRequest){
 	        getMyMovie(yourRequest);
 	        break;
 	    case "do-what-it-says":
+	    	// execute getRandom and read our file and pick a random command
 	    	getRandom();
 	    	break;
 	    	// if nothing matches
 	    default:
 	        console.log("Ooops! Something went wrong!");
+	        console.log("You tried to use: "+ command);
 	        console.log("---AVAILABLE COMMANDS:------");
 	        console.log("my-tweets");
 	        console.log("spotify-this-song");
@@ -64,9 +66,11 @@ function getRandom(){
 	  var commandChosen = dataArr[Math.floor(Math.random() * dataArr.length)];
 
 	  commandChosen= String(commandChosen);
+	  //console.log(typeof commandChosen);
 	  console.log("Random Command Chosen: "+ commandChosen);
 
-	  executeCommand(commandChosen);
+	  // make sure to trim excess white space from the output or it wont work
+	  executeCommand(commandChosen.trim());
 
 	});
 
@@ -134,8 +138,8 @@ function getMyTweets(){
 // Passing index 1 as arg we search for a song
 function getMySong(yourSong){
 
-	// if no song was provided
-	if(yourSong=== null){
+	// if no song was provided, checks that arg is empty
+	if(typeof yourSong === "undefined" || null){
 		yourSong= "The Sign";
 	}
 
@@ -161,6 +165,7 @@ function getMySong(yourSong){
 // using request package we communicate with OMDB to get movie info
 function getMyMovie(yourMovie){
 
+// if arg is empty or undefined use this value
 	if(typeof yourMovie === "undefined" || null){
 		yourMovie= "Free Willy";
 	}
