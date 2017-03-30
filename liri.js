@@ -139,20 +139,21 @@ function getMySong(yourSong){
 		yourSong= "The Sign";
 	}
 
-	spotify.search({ type: 'track', query: yourSong, limit: "1"}, function(err, data) {
-
+	spotify.search({ type: 'track', query: yourSong }, function(err, data) {
     if ( err ) {
         console.log('Error occurred: ' + err);
         return;
     }
- 	
- 	data = JSON.stringify(data, null, 2);
- 	console.log("-------------MY SONG RESULTS--------------");
+
+   	console.log("-------------MY SONG RESULTS--------------");
 	console.log(" ");
- 	console.log("raw response from song:"+ data);
-    console.log(" ");
-	
+   	console.log("Artist: "+ data.tracks.items[0].artists[0].name);
+   	console.log("Song: "+ data.tracks.items[0].name);
+   	console.log("Album: "+ data.tracks.items[0].album.name);
+   	console.log("Link: "+ data.tracks.items[0].album.external_urls.spotify);
+   	console.log(" ");
 });
+ 	
 
 };
 
